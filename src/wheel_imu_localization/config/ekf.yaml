@@ -1,0 +1,42 @@
+ekf_filter_node:
+  ros__parameters:
+    frequency: 20.0  # or 20 even
+    sensor_timeout: 0.1
+    two_d_mode: true
+    publish_tf: true
+    publish_acceleration: false
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_footprint
+    world_frame: odom
+
+    #################################
+    # Wheel Odometry - position + linear velocity ONLY
+    #################################
+    odom0: /wheel/odom
+    odom0_config: [
+      true,  true,  false,
+      false, false, false,   # <- yaw disabled, IMU owns rotation
+      true,  false, false,
+      false, false, false,   # <- vyaw disabled, IMU owns rotation
+      false, false, false
+    ]
+    odom0_queue_size: 10
+    odom0_differential: false
+    odom0_relative: false
+
+    #################################
+    # IMU - rotation ONLY
+    #################################
+    imu0: /imu/data
+    imu0_config: [
+      false,false,false,
+      false,false,true,     # yaw (absolute, stable at rest per your log)
+      false,false,false,
+      false,false,true,     # vyaw (angular rate)
+      false,false,false
+    ]
+    imu0_remove_gravitational_acceleration: false
+    imu0_queue_size: 10
+    imu0_differential: false
+    imu0_relative: false
