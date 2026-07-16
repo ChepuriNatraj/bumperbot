@@ -27,7 +27,10 @@ def generate_launch_description():
     world_path = PathJoinSubstitution([
             bumperbot_description,
             "worlds",
-            PythonExpression(expression=["'", LaunchConfiguration("world_name"), "'", " + '.world'"])
+            PythonExpression(expression=[
+                "'", LaunchConfiguration("world_name"), "'",
+                ".removesuffix('.world') + '.world'"
+            ])
         ]
     )
 

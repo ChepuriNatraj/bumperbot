@@ -134,6 +134,57 @@ teleop (/cmd_vel, Twist)
 
 ---
 
+## 5. Gazebo fails to load `small_house` / `small_warehouse` world
+
+**Symptom A** — `gz sim` dies immediately:
+```
+[Wrn] [gz.cc:102] Fuel world download failed because Fetch failed. Other errors
+[gazebo-2] Unable to find or download file
+[ERROR] [gazebo-2]: process has died
+```
+**Root cause**: `robot_gazebo.launch.py` unconditionally appended `.world` to
+`world_name`, so `world_name:=small_house.world` resolved to the nonexistent
+`small_house.world.world`, and Gazebo fell back to (failed) Fuel download.
+**Fix (applied)**: the launch file now strips a trailing `.world` before
+re-appending it, so both `world_name:=small_house` and
+`world_name:=small_house.world` resolve correctly.
+
+**Symptom B** — world loads but every prop is missing:
+```
+Error Code 14: ... Unable to find uri[model://aws_robomaker_residential_...]
+```
+followed by the server shutting itself down.
+**Root cause**: `small_house.world` / `small_warehouse.world` reference ~63/13
+external AWS RoboMaker models via `model://` URIs. `gz sim` only resolves bare
+`model://name` URIs against `GZ_SIM_RESOURCE_PATH` — it does **not** fall back
+to Fuel for these. The `models/` directory in this repo previously only held a
+`.gitkeep` placeholder.
+**Fix (applied)**: the required model directories are now vendored under
+`src/bumperbot_description/models/` (copied from the `ros2` branches of
+`aws-robotics/aws-robomaker-small-house-world` and
+`aws-robomaker-small-warehouse-world` on GitHub). `robot_gazebo.launch.py`
+already points `GZ_SIM_RESOURCE_PATH` at this directory, so no further setup
+is needed — just rebuild (`colcon build --packages-select
+bumperbot_description`) after pulling.
+
+---
+
+## 6. Saving a map: `save_map_timeout` type error
+
+**Symptom**
+```
+[map_saver_cli]: Unexpected problem appear: parameter 'save_map_timeout'
+has invalid type: Wrong parameter type ... is of type {double} ...
+```
+
+**Fix** — pass the timeout as a float, not an integer:
+```bash
+ros2 run nav2_map_server map_saver_cli -f maps/my_map \
+  --ros-args -p save_map_timeout:=10000.0
+```
+
+---
+
 ## How to run (verified working)
 
 ```bash

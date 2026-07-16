@@ -58,6 +58,44 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 `teleop_twist_keyboard` publishes `Twist` on `/cmd_vel`; the `twist_relay` node
 converts it to `TwistStamped` for the `DiffDriveController`.
 
+> **Note on worlds:** `empty.world` loads instantly. `small_house.world` and
+> `small_warehouse.world` reference external AWS RoboMaker models via
+> `model://` URIs; the required model directories are vendored under
+> `src/bumperbot_description/models/` (pulled from the `ros2` branches of
+> `aws-robotics/aws-robomaker-small-house-world` and
+> `aws-robomaker-small-warehouse-world`), so no network access is needed at
+> launch time.
+
+## Build a map with SLAM and save it
+
+Requires `ros-jazzy-slam-toolbox` and `ros-jazzy-nav2-bringup`:
+```bash
+sudo apt-get install -y ros-jazzy-slam-toolbox ros-jazzy-nav2-bringup
+```
+
+```bash
+# Terminal 1 — robot in Gazebo (empty world loads fastest)
+ros2 launch bumperbot_description robot_gazebo.launch.py world_name:=empty
+
+# Terminal 2 — controllers
+ros2 launch bumperbot_controller controller.launch.py use_simple_controller:=False
+
+# Terminal 3 — SLAM
+ros2 launch slam_toolbox online_async_launch.py use_sim_time:=true
+
+# Terminal 4 — drive the robot to explore (teleop, or publish /cmd_vel)
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
+
+When the map looks complete, save it:
+```bash
+mkdir -p maps
+ros2 run nav2_map_server map_saver_cli -f maps/my_map --ros-args -p save_map_timeout:=10000.0
+```
+This writes `maps/my_map.pgm` and `maps/my_map.yaml`. The saved map can then be
+loaded by `robot_bringup bringup.launch.py` (update its `map` argument to point
+at your `my_map.yaml`).
+
 ## Run on the real robot
 
 Full autonomous navigation (loads a saved map):
