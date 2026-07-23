@@ -42,7 +42,13 @@ bumperbot_controller:
     publish_wheel_data: true
 
     # Publish to TF directly or not
-    enable_odom_tf: true
+    # DISABLED: DiffDriveController must NOT broadcast odom->base_footprint.
+    # The robot_localization EKF (wheel_imu_localization/ekf.yaml, publish_tf: true)
+    # is the SOLE publisher of odom->base_footprint. Two publishers on this edge
+    # (wheel integration vs IMU-fused EKF yaw) were the cause of the rotational
+    # LiDAR/map drift under Nav2. The EKF still receives its wheel input from
+    # /wheel/odom (odom_nodef), so disabling this TF does not break odometry.
+    enable_odom_tf: false
 
     # Velocity and acceleration limits
     # Whenever a min_* is unspecified, default to -max_*
