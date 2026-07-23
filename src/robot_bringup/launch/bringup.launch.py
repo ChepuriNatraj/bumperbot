@@ -73,9 +73,9 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            "map": "/home/amr/maps/my_map.yaml",
+            "map": "/home/botforgelabs2/Desktop/bumperbot/maps/my_map.yaml",
             "use_sim_time": "false",
-            "params_file": "/home/amr/robot_ws/src/robot_bringup/config/nav2_params_default.yaml"
+            "params_file": "/home/botforgelabs2/Desktop/bumperbot/src/robot_bringup/config/nav2_params_default.yaml"
         }.items()
     )
 
@@ -89,7 +89,7 @@ def generate_launch_description():
         ),
         launch_arguments={
             "use_sim_time": "false",
-            "params_file": "/home/amr/robot_ws/src/robot_bringup/config/nav2_params_default.yaml"
+            "params_file": "/home/botforgelabs2/Desktop/bumperbot/src/robot_bringup/config/nav2_params_default.yaml"
         }.items()
     )
 
